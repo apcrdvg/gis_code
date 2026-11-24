@@ -1,0 +1,290 @@
+---
+title: "P02"
+output: html_document
+---
+
+# Create some objects
+
+```{r}
+a <- 1
+b <- 2
+
+A+B
+```
+
+# Check list of -active- objects 
+
+```{r}
+rm(A)
+
+ls()
+
+
+```
+FUNCTIONS
+
+Usually have this form  
+
+```{r}
+
+# don't run these
+X <- function(object, argument1, argument2, argument3)
+
+```
+
+
+PLOT
+
+```{r}
+
+#create some datasets, first a vector of 1-100 and 101-200
+# c means combine
+
+Data1 <- c(1:100)
+Data2 <- c(101:200)
+
+#Plot the data
+plot(Data1, Data2, col="red")
+
+```
+
+
+```{r}
+#just for fun, create some more, this time some normally distributed
+#vectors of 100 numbers
+
+Data3 <- rnorm(100, mean = 53, sd=34)
+Data4 <- rnorm(100, mean = 64, sd=14)
+
+#plot
+plot(Data3, Data4, col="blue")
+
+```
+
+TO GET HELP try
+
+```{r}
+?plot
+
+```
+
+DATA STRUCTURES
+
+These include 
+
+[must only contain data of the same type (e.g. numeric or text)]
+a matrix, 
+an array, 
+a vector, 
+
+[mixture of data types (e.g. numeric and text)]
+a data frame and 
+a list.
+
+```{r}
+# define a dataframe
+
+df <- data.frame(Data1, Data2)
+plot(df, col="green")
+
+```
+
+```{r}
+#see only a selection of a large dataframe
+
+library(tidyverse)
+
+#show the first 10 and then last 10 rows of data in df...
+df %>%
+  head()
+```
+
+```{r}
+df %>%
+  tail()
+```
+
+%>% is a pipe  "THEN" [from 'magrittr' package]
+|> is also a pipe 
+
+to get to ELEMENTS ON THE DATAFRAME
+
+```{r}
+# Don't run
+# use the single square bracket [] operator
+# to select, or subset
+
+data.frame[row,column]
+```
+
+```{r}
+df[1:10, 1]
+df[5:15,]
+df[c(2,3,6),2]
+df[,1]
+
+```
+
+```{r}
+library(dplyr)
+
+df <- df %>%
+  dplyr::rename(column1 = Data1, column2=Data2)
+
+```
+
+```{r}
+df %>% 
+  dplyr::select(column2)
+```
+
+TO CALL COLUMNS BY THEIR NAME
+(A) use dplyr (see above) or
+(B) use '$' operator or
+(C) use double square bracket '[[]]' operator, and refer to our column by name using quotes 
+
+```{r}
+
+# Do not run
+# The form to call for an specific column in dataframe is
+
+data.frame$columnName
+
+# now aplying it
+
+df$column1
+
+df[['column2']]
+```
+
+OLD SKOOL CLEANING
+
+```{r}
+?read.csv2
+
+#check what separator the file uses
+
+readLines("Prac2_data/LondonData.csv", n = 5)
+
+#it shows semicolon ";"
+
+LondonDataOSK <- read.table("Prac2_data/LondonData.csv", 
+                         header = TRUE,
+                         sep = ";",
+                         fileEncoding = "Windows-1252"
+                         )
+```
+
+
+NOW, BRING THE DATA STRAIGHT FROM THE WEBSITE
+
+```{r}
+#wang the data in straight from the web using read_csv, 
+#skipping over the 'n/a' entries as you go...
+
+LondonData <- read_csv("https://data.london.gov.uk/download/f33fb38c-cb37-48e3-8298-84c0d3cc5a6c/772d2d64-e8c6-46cb-86f9-e52b4c7851bc/ward-profiles-excel-version.csv",
+                       locale = locale(encoding = "latin1"),
+                       na = "n/a")
+
+```
+
+```{r}
+# Check the new data
+
+class(LondonData)
+```
+
+```{r}
+# or, if you have your old skool data
+class(LondonDataOSK)
+```
+
+```{r}
+Datatypelist <- LondonData %>% 
+  summarise_all(class) %>%
+  pivot_longer(everything(), 
+               names_to="All_variables", 
+               values_to="Variable_class")
+
+Datatypelist
+```
+
+
+```{r}
+summary(df)
+```
+
+```{r}
+LondonData%>%
+  colnames()%>%
+  # just look at the head, top5
+  head()
+```
+
+SELECT SOME ROWS
+
+```{r}
+LondonBoroughs<-LondonData[626:658,]
+
+# or with dplyr
+
+LondonBoroughs<-LondonData%>%
+  dplyr::slice(626:658)
+```
+
+OTHER COOL WAY IS FILTER
+
+```{r}
+Femalelifeexp<- LondonData %>% 
+  filter(`Female life expectancy -2009-13`>90)
+
+```
+
+OR DETECT -USE WITH STRINGS-
+
+```{r}
+library(stringr)
+
+LondonBoroughs<- LondonData %>% 
+  filter(str_detect(`New code`, "^E09"))
+
+LondonBoroughs$`Ward name`
+```
+
+```{r}
+LondonBoroughs %>% 
+  dplyr::select(`Ward name`) %>%
+  print()
+```
+```{r}
+
+#  you will have two rows at the top for the City of London
+# get unique values
+
+LondonBoroughs<-LondonBoroughs %>%
+  distinct()
+```
+
+SELECT COLUMNS
+
+```{r}
+#select columns 1,19,20 and 21
+LondonBoroughs_manualcols<-LondonBoroughs[,c(1,19,20,21)]
+
+# or you can also
+
+LondonBoroughs_dplyrcols<-LondonBoroughs %>%
+  dplyr::select(c(1,19,20,21))
+
+```
+
+COOL WAY
+
+```{r}
+
+LondonBoroughs_contains<-LondonBoroughs %>% 
+  dplyr::select(contains("expectancy"), 
+         contains("obese - 2011/12 to 2013/14"),
+         contains("Ward name")) 
+```
+

@@ -1,0 +1,79 @@
+```{r}
+install.packages(c("sf", "tmap", "tmaptools", "RSQLite", "tidyverse"), 
+                 repos = "https://www.stats.bris.ac.uk/R/")
+```
+Ok
+
+```{r}
+library(tidyverse)
+mycsv <- read_csv("Prac1_data/fly_tipping_borough_edit.csv")  
+```
+
+```{r}
+mycsv <- read_csv2("Prac1_data/fly_tipping_borough_edit.csv")  
+```
+Ok, me sirve
+
+```{r}
+library(sf)
+```
+
+Now
+
+```{r}
+
+# my data is within a prac1_data folder.
+
+shape <- st_read("Prac1_data/statistical-gis-boundaries-london/ESRI/London_Borough_Excluding_MHW.shp")
+```
+
+```{r}
+
+summary(shape)
+
+```
+
+```{r}
+plot(shape)
+```
+
+
+```{r}
+
+shape %>% 
+  st_geometry() %>%
+  plot()
+
+```
+
+```{r}
+
+shape2 <- shape%>%
+  merge(.,
+        mycsv,
+        by.x="GSS_CODE", 
+        by.y="GSS_CODE")
+
+```
+
+```{r}
+shape%>%
+  head(., n=10)
+```
+
+```{r}
+install.packages("tmap")
+```
+
+
+```{r}
+library(tmap)
+```
+
+```{r}
+tmap_mode("plot")
+# change the fill to your column name if different
+shape2 %>%
+  qtm(.,fill = "2011_12")
+```
+
